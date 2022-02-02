@@ -15,13 +15,15 @@ private:
     int _maxSize = 3;
     Produce *deliveryItems;
     int _numItems = 0;
+    double _totalCost = 0;
     static int genNameIndex(int maxIndex);
     static int genClassIndex(int maxIndex);
     static int genStorageMethodIndex(int maxIndex);
     static double genCost(double minCost, double maxCost);
     static int genAmount(int maxAmount);
-    static int genMaxTime(int maxMaxTime);
+    static int genMaxTime(int currTime, int maxMaxTime);
     Produce* expand(Produce* arr);
+    void copy(const Delivery& src);
 
 
 
@@ -34,13 +36,13 @@ public:
     Delivery(Delivery&& src) noexcept;
     Delivery& operator=(Delivery&& src) noexcept;
     ~Delivery();
-    void copy(const Delivery& src);
     Produce* forecastDelivery(int minPrice);
     void fillBox(Produce* newProduce);
-    void replaceItem(int itemIndex);
+    void replaceItem(int itemIndex, int currTime);
     void deliverBox(int currTime);
     string shareOrder();
-    Produce makeProduce(double minCost);
+    Produce makeProduce(double minCost, int currTime);
+    [[nodiscard]] int getTotalCost() const;
 };
 
 

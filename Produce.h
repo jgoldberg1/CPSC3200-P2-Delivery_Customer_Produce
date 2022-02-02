@@ -8,6 +8,14 @@ using namespace std;
 #ifndef P2_PRODUCE_H
 #define P2_PRODUCE_H
 
+struct ProduceInput {
+    string name;
+    string classification;
+    double cost;
+    double amount;
+    string storageReqs;
+    string maxTime;
+};
 
 class Produce {
 private:
@@ -42,16 +50,11 @@ public:
     Produce(Produce&& src) noexcept;
     Produce();
     Produce(string name, string classification, double cost, double amount, string storageReqs, int maxTime);
-    string getName();
-    string getClass();
-    const double getCost();
-    const double getAmount();
-    string getStorageReqs();
-    int getExpirationDate();
-    string getStorageMethod();
+    double getCost() const;
     bool spoil();
     bool outage();
     bool checkExpired(int currTime);
+    string query();
 };
 
 

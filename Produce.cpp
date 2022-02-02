@@ -2,10 +2,22 @@
 // Created by jenma on 1/15/2022.
 //
 
+/*
+ * Class Invariant (description of class)
+ *
+ * Interface Invariant (explanation of public methods)
+ *
+ */
+
+/*PUT AT BOTTOM OF DOC
+ *  Implementation Invariant (explanation of design choices)
+ *
+ *
+ *
+*/
 #include <cmath>
 #include <random>
 #include "Produce.h"
-
 
 
 Produce::Produce() = default;
@@ -79,19 +91,19 @@ Produce& Produce::operator=(Produce&& src) noexcept
             return *this;
         }
 
-string Produce::getName() { return _name; }
+//string Produce::getName() { return _name; }
 
-string Produce::getClass() { return _classification; }
+//string Produce::getClass() { return _classification; }
 
-const double Produce::getCost() { return _cost; }
+double Produce::getCost() const { return _cost; }
 
-const double Produce::getAmount() { return _amount; }
+//const double Produce::getAmount() { return _amount; }
 
-string Produce::getStorageReqs() { return _storageReqs; }
+//string Produce::getStorageReqs() { return _storageReqs; }
 
-int Produce::getExpirationDate() { return _expirationDate; }
+//int Produce::getExpirationDate() { return _expirationDate; }
 
-string Produce::getStorageMethod() { return _storageMethod; }
+//string Produce::getStorageMethod() { return _storageMethod; }
 
 bool Produce::spoil() {
     _expired = true;
@@ -110,6 +122,15 @@ bool Produce::outage()
     if (currTime >= _maxTime) return spoil();
     if (currTime >= _expirationDate) return spoil();
     return _expired;
+}
+
+string Produce::query()
+{
+    cout << "in query" << endl;
+    string report = "Name: " + _name + ". Class: " + _classification + ". Price: " + to_string(_cost) +
+            ". Expired: " + to_string(_expired) + ". Expiration time: " + to_string(_expirationDate)
+            + " hours. \n";
+    return report;
 }
 
 

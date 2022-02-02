@@ -18,13 +18,12 @@ private:
     double _minPrice;
     int genDeliveryTime();
     Delivery _del;
-
+    void payForOrder();
 public:
-    //methods
     Customer(string name, string address, double balance, double minPrice);
     void orderDelivery();
     string queryDelivery();
-    Delivery getDel();
+    string summarize();
 };
 
 
