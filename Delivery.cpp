@@ -1,36 +1,9 @@
-//
-// Created by jenma on 1/15/2022.
-//
 /*
- * Class Invariant (description of class)
- * The purpose of this class is to model deliveries put together by a produce delivery service. Deliveries have a
- * variable number of Produce items in the array deliveryList. Once Delivery objects are initialized, the client can
- * call deliverBox(currTime) to "deliver" the box, at which point any produce that expired before the delivery time
- * currTime will be replaced with nonspoiled produce. In addition, the class can query information about the delivery
- * or the cost of the delivery.
- *
- * Interface Invariant (explanation of public methods)
- * Delivery()
- * -  default constructor that is not meant to be used. If it is used, the class will not work properly
- * Delivery(int minPrice)
- * - parameterized constructor meant to be used. Initializes the object and adds the generated Produce to it
- * getTotalCost()
- * - getter function for _totalCost
- * shareOrder()
- * - returns a string with information about all the produce items in the Delivery
- * deliverBox(int currTime)
- * - checks if each item in deliveryList will be expired at the time of delivery (currTime). If they are/will be
- *   expired, they are replaced.
- *
- */
-
-/*PUT AT BOTTOM OF DOC
- *  Implementation Invariant (explanation of design choices)
+ *  Implementation Invariant
  * Delivery()
  * - default constructor that initializes to invalid state
- * Delivery(minPrice)
- * -
- * makeProduce(minPrice, currTime)
+ * Delivery(int minPrice)
+ * makeProduce(int minPrice, int currTime)
  * - randomly generates and returns a produce object. uses helper functions to generate attributes.
  *  - has a minPrice that defaults to 0 so it can be used in the initial scheduling of a delivery, where there is no
  *  minimum price, and in the replace() function, where the produce generated must have a minimum price to maintain
@@ -54,7 +27,18 @@
  * - calls the generation of a new Produce item in deliveryItems at itemIndex. The new item generated has a cost equal
  *   or greater than the original item at itemIndex.
  * - adjusts the value of _totalPrice according to the cost of the new Produce item.
- *
+ * genNameIndex()
+ * - helper func, generates index for NAMES array to be used in makeProduce()
+ * genClassIndex()
+ * - helper func, generates index for CLASSIFICATIONS array to be used in makeProduce()
+ * genStorageIndex()
+ * - helper func, generates index for STORAGE_REQS array to be used in makeProduce()
+ * genCost()
+ * - helper func, generates int cost to be used in makeProduce()
+ * genAmount()
+ * - helper func, generates int amount to be used in makeProduce()
+ * genMaxMaxTime()
+ * - helper func, generates int maxTime to be used in makeProduce()
  *
  *
  *
@@ -141,7 +125,7 @@ Delivery& Delivery::operator=(Delivery&& src) noexcept
 
 //Precondition: None
 //Postcondition: returns the total cost. getter function
-int Delivery::getTotalCost() const { return _totalCost; }
+double Delivery::getTotalCost() const { return _totalCost; }
 
 //Precondition: maxIndex, the maximum number possible to generate
 //Postcondition: returns int between 0 and maxIndex
@@ -175,7 +159,6 @@ double Delivery::genCost(double minCost, double maxCost)
 //Postcondition: returns int between 0 and maxAmount
 int Delivery::genAmount(int maxAmount)
 {
-    //uniform_int_distribution<int> distro(0, maxAmount);
     return (distroDelivery(mtDelivery) % maxAmount);
 }
 
@@ -183,40 +166,43 @@ int Delivery::genAmount(int maxAmount)
 //Postcondition: returns int between 0 and maxMaxTime
 int Delivery::genMaxTime(int currTime, int maxMaxTime)
 {
-    //uniform_real_distribution<float> distro(0, maxMaxTime);
     return (distroDelivery(mtDelivery) % maxMaxTime + currTime);
 }
 
 Delivery::~Delivery()
 {
     delete[] deliveryItems;
-    //cout << "Destruction success" << endl;
 }
 
 
 //Precondition: minCost, the minimum cost of the generated produce object
 //Postcondition: returns Produce object with randomly generated attributes
 Produce Delivery::makeProduce(double minCost = 0.0, int currTime = 0) {
-    //cout << "in makeProduce" << endl;
     double MAX_COST = 100.00;
     int MAX_AMOUNT = 100;
     int MAX_TIME = 500;
-    string names[] = {"Potato", "Onion", "Winter Squash", "Garlic", "Apple", "Cilantro",
+    const string NAMES[] = {"Potato", "Onion", "Winter Squash", "Garlic", "Apple", "Cilantro",
                       "Blueberry", "Zucchini", "Apricot", "Chantrelle Mushrooms", "Banana",
                       "Thyme", "Oyster Mushroom"};
-    string classifications[] = {"Fruit", "Vegetable", "Fungus", "Herb"};
-    string storageReqs[] = {"dark", "counter", "refrigerate"};
-    //cout << (*(&names+1)-names) << endl;
-    int namesIndex = genNameIndex(int(*(&names+1)-names-1));
-    int classIndex = genClassIndex(int(*(&classifications+1)-classifications-1));
-    int storageReqsIndex = genStorageMethodIndex(int(*(&storageReqs+1)-storageReqs-1));
+    const string CLASSIFICATIONS[] = {"Fruit", "Vegetable", "Fungus", "Herb"};
+    const string STORAGE_REQS[] = {"dark", "counter", "refrigerate"};
+    int namesIndex = genNameIndex(int(*(&NAMES+1)-NAMES-1));
+    int classIndex = genClassIndex(int(*(&CLASSIFICATIONS+1)-CLASSIFICATIONS-1));
+    int storageReqsIndex = genStorageMethodIndex(int(*(&STORAGE_REQS+1)-STORAGE_REQS-1));
+    int storageMethIndex = genStorageMethodIndex(int(*(&STORAGE_REQS+1)-STORAGE_REQS-1));
     double cost = genCost(minCost, MAX_COST);
     double amount = genAmount(MAX_AMOUNT);
     int maxTime = genMaxTime(currTime, MAX_TIME);
-    //cout << "just stuff. food: " << namesIndex << " storageMethod: " << storageReqsIndex << " expirationDate:" << maxTime << endl;
-    Produce p = Produce(names[namesIndex], classifications[classIndex], cost, amount,
-                           storageReqs[storageReqsIndex], maxTime);
-    //cout << "op= successful" << endl;
+    ProduceInput pInfo = {
+            NAMES[namesIndex],
+            CLASSIFICATIONS[classIndex],
+            cost,
+            amount,
+            STORAGE_REQS[storageReqsIndex],
+            STORAGE_REQS[storageMethIndex],
+            maxTime
+    };
+    Produce p = Produce(pInfo);
     return p;
 }
 
@@ -224,7 +210,6 @@ Produce Delivery::makeProduce(double minCost = 0.0, int currTime = 0) {
 //Postcondition: pointer to an array of produce objects
 Produce* Delivery::expand(Produce *arr)
 {
-    //cout << "in expand" << endl;
     _maxSize *= 2;
     Produce* newArr = new Produce[_maxSize];
 
@@ -236,27 +221,20 @@ Produce* Delivery::expand(Produce *arr)
     arr = newArr;
     newArr = nullptr;
     return arr;
-    cout << "expansion complete" << endl;
 }
 
 //Precondition: minPrice, the minimum total price the order should have
 //Postcondition: returns an array of produce objects
 Produce* Delivery::forecastDelivery(int minPrice)
 {
-    //cout << "in forecast delivery" << endl;
     _totalCost = 0;
     Produce* newProduce = new Produce[_maxSize];
     while (_totalCost < minPrice) {
         if (_numItems >= _maxSize) newProduce = expand(newProduce);
-        //cout << "num items: " << _numItems << " maxSize: " << _maxSize << endl;
         newProduce[_numItems] = makeProduce();
-        //cout << "out of makeProduce" << endl;
         _totalCost += newProduce[_numItems].getCost();
         _numItems++;
     }
-
-    //cout << "forecastDelivery complete" << endl;
-    cout << "totalCost in forecastDelivery: " << _totalCost << endl;
     return newProduce;
 }
 
@@ -264,11 +242,9 @@ Produce* Delivery::forecastDelivery(int minPrice)
 //Postcondition: None
 void Delivery::fillBox(Produce* newProduce)
 {
-    //cout << "in fillBox" << endl;
     deliveryItems = new Produce[_numItems];
     for (int i = 0; i < _numItems; i++)
     {
-        //cout << "in fillBox loop" << endl;
         deliveryItems[i] = newProduce[i];
     }
 }
@@ -277,7 +253,6 @@ void Delivery::fillBox(Produce* newProduce)
 //Postcondition: None
 void Delivery::replaceItem(int itemIndex, int currTime)
 {
-    //cout << "in replaceItem" << endl;
     double minCost = deliveryItems[itemIndex].getCost();
     _totalCost -= minCost;
     deliveryItems[itemIndex] = makeProduce(minCost, currTime);
@@ -290,7 +265,6 @@ void Delivery::replaceItem(int itemIndex, int currTime)
 //Postcondition: items that are expired at the time of currTime are replaced by nonspoiled items.
 void Delivery::deliverBox(int currTime)
 {
-    //cout << "in deliverBox" << endl;
     for (int i = 0; i < _numItems; i++)
     {
         if(deliveryItems[i].checkExpired(currTime))
@@ -298,14 +272,12 @@ void Delivery::deliverBox(int currTime)
             replaceItem(i, currTime);
         }
     }
-    //cout << "_totalCost in deliverbox " << _totalCost << endl;
 }
 
 //Precondition: None
 //Postcondition: returns a string with information about all the produce items in the Delivery
 string Delivery::shareOrder()
 {
-    //cout << "in shareOrder" << endl;
     string report;
     for (int i = 0; i < _numItems; i++)
     {

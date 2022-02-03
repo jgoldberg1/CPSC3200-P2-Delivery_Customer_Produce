@@ -1,41 +1,56 @@
-//
-// Created by jenma on 1/15/2022.
-//
-
 /*
- * Class Invariant (description of class)
- *
- * Interface Invariant (explanation of public methods)
- *
- */
-
-/*PUT AT BOTTOM OF DOC
  *  Implementation Invariant (explanation of design choices)
+ *  - Move semantics supported
+ *  - Copy construction/assignment supported
  *
- *
- *
+ *  copy(const Produce& src)
+ *  - helper function for copying attributes of produce objects. used for copy constructors/move semantics.
+ *  zeroOut(Produce& src)
+ *  - helper function that sets all of src's attributes to 0/empty strings. used for move semantics.
+ *  outage()
+ *  - wrapper for spoil()
 */
-#include <cmath>
+
 #include <random>
 #include "Produce.h"
 
-
-Produce::Produce() = default;
-
-Produce::Produce(string name, string classification, double cost, double amount, string storageReqs, int maxTime)
+//default constructor
+Produce::Produce()
 {
-    _name = name;
-    _classification = classification;
-    _cost = cost;
-    _amount = amount;
-    _storageReqs = storageReqs;
-    _storageMethod = storageReqs;
-    _expirationDate = maxTime;
-    _maxTime = maxTime;
-    _currTime = 0;
+    _name = "invalid_name";
+    _classification = "invalid_class";
+    _cost = -1;
+    _amount = -1;
+    _storageReqs = "invalid_storage_reqs";
+    _expired = false;
+    _expirationDate = -1;
+    _storageMethod = "invalid_storage_method";
+    _maxTime = -1;
+    _currTime = -1;
 }
 
-//copy function
+//Parameterized Constructor
+Produce::Produce(const ProduceInput& info)
+{
+    const int IMPROPER_DARK_TIME = 24;
+    const int IMPROPER_REFRIGERATOR_TIME = 1;
+    const string DARK = "dark";
+    const string REFRIGERATOR = "refrigerator";
+    _name = info.name;
+    _classification = info.classification;
+    _cost = info.cost;
+    _amount = info.amount;
+    _storageReqs = info.storageReqs;
+    _storageMethod = info.storageMeth;
+    _maxTime = info.maxTime;
+    _currTime = 0;
+    if (info.storageMeth == DARK) _expirationDate = IMPROPER_DARK_TIME;
+    else if (info.storageMeth == REFRIGERATOR) _expirationDate = IMPROPER_REFRIGERATOR_TIME;
+    else _expirationDate = info.maxTime;
+}
+
+//Precondition: src, a Produce object
+//Postcondition: attributes of src are copied to this Produce object
 void Produce::copy(const Produce &src) {
     _name = src._name;
     _classification = src._classification;
@@ -48,6 +63,8 @@ void Produce::copy(const Produce &src) {
     _currTime = src._currTime;
 }
 
+//Precondition: src, a Produce object
+//Postcondition: the attributes of src are set to 0 or empty strings
 void Produce::zeroOut(Produce& src)
 {
     src._name = "";
@@ -61,11 +78,13 @@ void Produce::zeroOut(Produce& src)
     src._currTime = 0;
 }
 
+//Copy constructor
 Produce::Produce(const Produce& src)
 {
     copy(src);
 }
 
+//Overloaded assignment operator
 Produce& Produce::operator=(const Produce& src)
 {
     if (this == &src) return *this;
@@ -73,49 +92,42 @@ Produce& Produce::operator=(const Produce& src)
     return *this;
 }
 
-//how do move assignment constructors work?????
-//you copy and then set all of src's attributes to 0?
-//...why does this work?
+//Move constructor
 Produce::Produce(Produce&& src) noexcept
 {
     copy(src);
     zeroOut(src);
 }
 
+//Move assignment operator
 Produce& Produce::operator=(Produce&& src) noexcept
         {
             if (this == &src) return *this;
-            //MAYBE I NEED TO DELETE THINGS??
             copy(src);
             zeroOut(src);
             return *this;
         }
 
-//string Produce::getName() { return _name; }
-
-//string Produce::getClass() { return _classification; }
-
+//Precondition: None
+//Postcondition: returns _cost
 double Produce::getCost() const { return _cost; }
 
-//const double Produce::getAmount() { return _amount; }
-
-//string Produce::getStorageReqs() { return _storageReqs; }
-
-//int Produce::getExpirationDate() { return _expirationDate; }
-
-//string Produce::getStorageMethod() { return _storageMethod; }
-
+//Precondition: None
+//Postcondition: sets _expired to true, returns true
 bool Produce::spoil() {
     _expired = true;
     return true;
 }
 
+//Precondition: none
+//Postcondition: sets _expired to true, returns true
 bool Produce::outage()
 {
     return spoil();
 }
 
-//got rid of outage stuff!! make sure to document those changes
+//Precondition: currTime, the time used to compare against the expiration date
+//Postcondition: _expired possibly updated, returns value of _expired
  bool Produce::checkExpired(int currTime)
 {
     _currTime = currTime;
@@ -124,9 +136,10 @@ bool Produce::outage()
     return _expired;
 }
 
+//Precondition: None
+//Postcondition: returns string with summary of Produce object's attributes
 string Produce::query()
 {
-    cout << "in query" << endl;
     string report = "Name: " + _name + ". Class: " + _classification + ". Price: " + to_string(_cost) +
             ". Expired: " + to_string(_expired) + ". Expiration time: " + to_string(_expirationDate)
             + " hours. \n";

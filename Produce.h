@@ -1,6 +1,22 @@
-//
-// Created by jenma on 1/15/2022.
-//
+/*
+ * Class Invariant
+ *   The purpose of this class is to simulate produce items. Produce objects represent a group of the same type of
+ * produce that was bought at the same time. The main client interaction with the class involves the tracking of
+ * expiration and expiration dates. The client can check the expiration date, record that there has been a power outage,
+ * or mark an object as spoiled.
+ *
+ * Interface Invariant
+ * getCost()
+ * - getter function for the _cost attribute
+ * spoil()
+ * - marks an object as expired
+ * checkExpired(int currTime)
+ * - checks whether the object is expired at currTime
+ * query()
+ * - returns a summary of the Produce object
+ * outage()
+ * - marks an object as expired. User can call this to show that there has been an outage.
+ */
 #include <iostream>
 #include <cctype>
 #include <random>
@@ -14,13 +30,12 @@ struct ProduceInput {
     double cost;
     double amount;
     string storageReqs;
-    string maxTime;
+    string storageMeth;
+    int maxTime;
 };
 
 class Produce {
 private:
-    int IMPROPER_REFRIGERATE_TIME = 1;
-    int IMPROPER_DARK_TIME = 24;
     string _name = "invalid_name";
     string _classification = "invalid_class";
     double _cost = -1;
@@ -31,25 +46,16 @@ private:
     string _storageMethod = "invalid_storage_method";
     int _maxTime = -1;
     int _currTime = -1;
-
-    //methods
-public:
-    struct input {
-        string name = "invalid_name";
-        string classification = "invalid_classification";
-        double cost = -1;
-        double amount = -1;
-        string storageReqs = "invalid_storage_reqs";
-        int maxTime = -1;
-    };
     void copy(const Produce& src);
     void zeroOut(Produce& src);
+
+public:
     Produce(const Produce& src);
     Produce& operator=(const Produce& src);
     Produce& operator=(Produce&& src) noexcept;
     Produce(Produce&& src) noexcept;
     Produce();
-    Produce(string name, string classification, double cost, double amount, string storageReqs, int maxTime);
+    Produce(const ProduceInput& info);
     double getCost() const;
     bool spoil();
     bool outage();
